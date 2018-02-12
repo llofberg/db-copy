@@ -22,6 +22,7 @@ public class Db {
   private String user;
   private String pass;
   private String path;
+  private boolean autoCommit = true;
 
   private int resultSetDefaultType = ResultSet.TYPE_FORWARD_ONLY;
   private int resultSetDefaultConcurrency = ResultSet.CONCUR_READ_ONLY;
@@ -47,6 +48,13 @@ public class Db {
     }
     connection = DriverManager.getConnection(url, System.getenv(user), System.getenv(pass));
     connection.setAutoCommit(false);
+
+    if ((autoCommit) && connection.getAutoCommit()) {
+      connection.setAutoCommit(false);
+    } else if ((autoCommit) && (!connection.getAutoCommit())) {
+      connection.setAutoCommit(true);
+    }
+
     return connection;
   }
 

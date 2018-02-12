@@ -19,7 +19,7 @@ import static com.tm.etl.dbcopy.util.VelocityLoader.evaluate;
 public class SqlStep {
   public static VelocityContext context;
 
-  protected String name;
+  protected String name = "SqlStep";
   protected String sql;
   private Db db;
 
@@ -36,6 +36,8 @@ public class SqlStep {
   protected ResultSet resultSet = null;
   protected int columnCount = 0;
   private int batchSize = 1000;
+  public boolean okToFail = false;
+  private boolean stopWhenNoInput = false;
 
   public void run(SqlStep previousStep) throws SQLException, ClassNotFoundException {
     log.info("{}: {}", name, getClass().getName());
@@ -52,7 +54,12 @@ public class SqlStep {
       if (previousStep == null || (!previousStep.hasResult)) {
         preparedStatement.execute();
       } else {
-        load(preparedStatement, previousStep);
+        int batchCount = load(preparedStatement, previousStep);
+        if (batchCount == 0 && stopWhenNoInput) {
+          throw new RuntimeException("Input was expected but none was available.");
+        }else{
+          log.info("BatchCount: {}", batchCount);
+        }
       }
       if (doCommit) {
         db.commit();
@@ -76,7 +83,7 @@ public class SqlStep {
     }
   }
 
-  public void load(PreparedStatement preparedStatement, SqlStep previousStep) throws SQLException, ClassNotFoundException {
+  public int load(PreparedStatement preparedStatement, SqlStep previousStep) throws SQLException, ClassNotFoundException {
     int batchCount = 0;
     while (previousStep.resultSet.next()) {
       preparedStatement = setParameters(preparedStatement, previousStep);
@@ -88,6 +95,7 @@ public class SqlStep {
       executeBatch(preparedStatement, batchCount);
     }
     log.info("Total rows: " + batchCount);
+    return batchCount;
   }
 
   private void executeBatch(PreparedStatement preparedStatement, int batchCount) throws SQLException, ClassNotFoundException {

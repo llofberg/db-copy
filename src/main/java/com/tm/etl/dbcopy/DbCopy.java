@@ -34,8 +34,15 @@ public class DbCopy {
       try {
         step.run(previousStep);
       } catch (Exception e) {
-        log.error("Failed to run step '{}'", step.getName(), e);
-        throw new RuntimeException("Failed to run step '" + step.getName() + "'", e);
+        if (step.okToFail) {
+          log.info("Step '{}' failed, but it's ok. Cause: '{}'", step.getName(), e.getMessage());
+          if(step.isStopWhenNoInput()){
+            break;
+          }
+        } else {
+          log.error("Failed to run step '{}'", step.getName(), e);
+          throw new RuntimeException("Failed to run step '" + step.getName() + "'", e);
+        }
       }
       previousStep = step;
     }

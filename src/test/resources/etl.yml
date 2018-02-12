@@ -8,12 +8,14 @@ dbs:
   driver: "org.hsqldb.jdbc.JDBCDriver"
   url: "jdbc:hsqldb:mem:test"
   path: ./drivers/hsqldb-2.3.1.jar
+  autoCommit: false
 
 - &MARIA_DB
   name: "MariaDB4j"
   user: "root"
   pass: ""
   url: "jdbc:mysql://localhost:${PORT}/test"
+  autoCommit: false
 
 steps:
 # Log version and environment variable (be careful!)
@@ -96,19 +98,35 @@ steps:
   sql: "select * from HOO"
   dump: true
 - db: *HSQL_DB
-  name: "HSql 14"
+  name: "HSql 15"
   hasResult: true
   sql: "select count(1) HOO_COUNT from HOO"
   debug: true
   toContext: true
 - db: *HSQL_DB
-  name: "HSql 14"
+  name: "HSql 16"
   hasResult: true
   sql: "select case when ${HOO_COUNT} = 13 then 1 else 0 end HOO_OK from (VALUES(0))"
   debug: true
   toContext: true
 - db: *HSQL_DB
-  name: "HSql 14"
+  name: "HSql 17"
   hasResult: true
   sql: "select 1/${HOO_OK} from (VALUES(0))"
   dump: true
+- db: *HSQL_DB
+  name: "HSql 18"
+  sql: "select 1/0 from (VALUES(0))"
+  okToFail: true
+- db: *HSQL_DB
+  name: "HSql 19"
+  sql: "select hoo,ts from HOO where 1=0"
+  hasResult: true
+- db: *HSQL_DB
+  name: "HSql 20"
+  sql: "INSERT INTO HOO(hoo, ts)values(?, ?)"
+  okToFail: true
+  stopWhenNoInput: true
+- db: *HSQL_DB
+  name: "HSql 21"
+  sql: "select 1/0 from (VALUES(0))"

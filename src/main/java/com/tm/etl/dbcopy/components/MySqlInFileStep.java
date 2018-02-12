@@ -21,7 +21,7 @@ public class MySqlInFileStep extends SqlStep {
   }
 
   @Override
-  public void load(PreparedStatement preparedStatement, SqlStep previousStep) throws SQLException {
+  public int load(PreparedStatement preparedStatement, SqlStep previousStep) throws SQLException {
     log.debug("Loading with MySQL setLocalInfileInputStream()");
 
     // TODO: => com.mysql.cj.jdbc.PreparedStatement
@@ -33,5 +33,6 @@ public class MySqlInFileStep extends SqlStep {
     stream.setInputResultSet(previousStep.getResultSet());
     ((com.mysql.jdbc.PreparedStatement) preparedStatement).setLocalInfileInputStream(stream);
     preparedStatement.execute();
+    return 0;
   }
 }
