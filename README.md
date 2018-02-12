@@ -76,10 +76,10 @@ Second list, ```steps``` lists the operations to be executed.
 | debug         | false   | Print the data s it is being processed.                                        |                true |
 | dump          | false   | Dump all data the statement returns. Used for debugging.                       |                true |
 
-See [test resources](src/test/resource/) for more examples.
+See [test scripts](src/test/resources/) for more examples.
 
 When a steps hasResult is true, the next step can use the results as input.
-The order of columns in both the first step and the next step must matchas well as the number of question mark placeholders.
+The order of columns in both the first step and the next step must match as well as the number of questionmark placeholders.
 
           # Select three columns from HOO
           - db: *HSQL_DB
@@ -90,7 +90,7 @@ The order of columns in both the first step and the next step must matchas well 
           # Insert three columns in the same order as above to MOO
           - db: *MARIA_DB
             name: "Maria 6"
-            sql: "INSERT INTO MOO(id, amount, ts)values(?, ?, ?)" # Note the three question mark placeholders
+            sql: "INSERT INTO MOO(id, amount, ts)values(?, ?, ?)" # Note the three questionmark placeholders
 
 When a steps toContext is true, the following steps can use the results first rows data as variables.
 
