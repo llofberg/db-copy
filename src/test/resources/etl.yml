@@ -7,7 +7,9 @@ dbs:
   pass: ""
   driver: "org.hsqldb.jdbc.JDBCDriver"
   url: "jdbc:hsqldb:mem:test"
-  path: ./drivers/hsqldb-2.3.1.jar
+  jars:
+    - "jar:file:./drivers/hsqldb-2.3.1.jar!/"
+    - "jar:file:./drivers/h2-1.4.196.jar!/"
   autoCommit: false
 
 - &MARIA_DB

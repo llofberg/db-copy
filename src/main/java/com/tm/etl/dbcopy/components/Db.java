@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 @Data
 @Slf4j
@@ -21,7 +22,7 @@ public class Db {
   private String url;
   private String user;
   private String pass;
-  private String path;
+  private URL[] jars;
   private boolean autoCommit = true;
 
   private int resultSetDefaultType = ResultSet.TYPE_FORWARD_ONLY;
@@ -33,15 +34,13 @@ public class Db {
     if (connection != null)
       return connection;
 
-    if ((path != null) && !"".equals(path)) {
+    if ((jars != null) && (jars.length > 0)) {
       try {
-        String spec = "jar:file:" + path + "!/";
-        URL u = new URL(spec);
-        URLClassLoader ucl = new URLClassLoader(new URL[]{u});
+        URLClassLoader ucl = new URLClassLoader(jars);
         Driver d = (Driver) Class.forName(driver, true, ucl).newInstance();
         DriverManager.registerDriver(new DriverShim(d));
       } catch (Exception e) {
-        throw new RuntimeException("Failed to load driver: " + path, e);
+        throw new RuntimeException("Failed to load driver: " + Arrays.toString(jars), e);
       }
     } else if ((driver != null) && !"".equals(driver)) {
       Class.forName(driver);
