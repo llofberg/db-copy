@@ -38,6 +38,8 @@ public class SqlStep {
   private int batchSize = 1000;
   public boolean okToFail = false;
   private boolean stopWhenNoInput = false;
+  private boolean useWasNull = true;
+  private boolean doCloseConnection = false;
 
   public void run(SqlStep previousStep) throws SQLException, ClassNotFoundException {
     log.info("{}: {}", name, getClass().getName());
@@ -57,12 +59,15 @@ public class SqlStep {
         int batchCount = load(preparedStatement, previousStep);
         if (batchCount == 0 && stopWhenNoInput) {
           throw new RuntimeException("Input was expected but none was available.");
-        }else{
+        } else {
           log.info("BatchCount: {}", batchCount);
         }
       }
       if (doCommit) {
         db.commit();
+      }
+      if (doCloseConnection) {
+        db.close();
       }
     }
     if (previousStep != null) {
@@ -136,7 +141,7 @@ public class SqlStep {
         Boolean b = (Boolean) object;
         object = b ? 1 : 0;
       }
-      if (previousStep.resultSet.wasNull()) {
+      if (previousStep.useWasNull && previousStep.resultSet.wasNull() || object == null) {
         if (debug) {
           log.debug("{}: {} {}", i, null, previousStep.resultSet.getMetaData().getColumnTypeName(i));
         }

@@ -58,6 +58,13 @@ public class Db {
     return connection;
   }
 
+  public void close() throws SQLException {
+    if (connection != null) {
+      log.info("Closing db: {}", getName());
+      connection.close();
+    }
+  }
+
   public void commit() throws SQLException, ClassNotFoundException {
     log.info("Commit: " + name);
     connect().commit();
