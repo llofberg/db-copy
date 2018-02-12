@@ -1,0 +1,42 @@
+# Example configuration file
+dbs:
+- &HSQL_DB
+  name: "HSql"
+  user: "sa"
+  pass: ""
+  driver: "org.hsqldb.jdbc.JDBCDriver"
+  url: "jdbc:hsqldb:mem:test"
+  path: ./drivers/hsqldb-2.3.1.jar
+
+- &H2_DB
+  name: "H2"
+  user: "sa"
+  pass: ""
+  driver: "org.h2.Driver"
+  url: "jdbc:h2:mem:test"
+  path: ./drivers/h2-1.4.196.jar
+
+
+steps:
+# Log version
+- db: *H2_DB
+  name: "Version 1"
+  sql: "SELECT
+          '\n  DbCopy version : ${dbCopyJar}',
+          '\n  Configuration  : ${ConfigurationFileName}',
+          '\n  Properties     : ${PropertiesFileName}',
+          '\n  Environment    : ${DidRunWithEnvironment}\n'
+        FROM (VALUES(0))"
+# Log version
+- db: *HSQL_DB
+  name: "Version 2"
+  sql: "SELECT
+          '\nCurrent dir: ${PWD}',
+          '\nHome    dir: ${HOME}\n'
+        FROM (VALUES(0))"
+- db: *HSQL_DB
+  name: "Version 1"
+  sql: "SELECT
+          '\nPROP: ${PROP}',
+          '\nprop: ${prop}\n'
+        FROM (VALUES(0))"

@@ -1,0 +1,114 @@
+# Test configuration file
+
+dbs:
+- &HSQL_DB
+  name: "HSql"
+  user: "sa"
+  pass: ""
+  driver: "org.hsqldb.jdbc.JDBCDriver"
+  url: "jdbc:hsqldb:mem:test"
+  path: ./drivers/hsqldb-2.3.1.jar
+
+- &MARIA_DB
+  name: "MariaDB4j"
+  user: "root"
+  pass: ""
+  url: "jdbc:mysql://localhost:${PORT}/test"
+
+steps:
+# Log version and environment variable (be careful!)
+- db: *MARIA_DB
+  name: "Maria 1"
+  sql: "SELECT '${dbCopyJar}', '${SECRET}'"
+# Create test tables
+- db: *HSQL_DB
+  name: "HSql 2"
+  sql: "CREATE TABLE HOO(hoo VARCHAR(256), ts TIMESTAMP(0))"
+- db: *MARIA_DB
+  name: "Maria 3"
+  sql: "CREATE TABLE MOO(moo VARCHAR(256), ts TIMESTAMP(0))"
+# Insert first batch of test data to HOO
+- db: *HSQL_DB
+  name: "HSql 4"
+  sql: "INSERT INTO HOO(hoo, ts)values
+    ('m1',           timestamp'2018-02-02 20:53:10'),
+    ('m2',           timestamp'2018-02-03 20:53:20'),
+    ('${dbCopyJar}', timestamp'2018-02-04 20:53:30')"
+# Load data from HOO
+- db: *HSQL_DB
+  name: "HSql 5"
+  hasResult: true
+  sql: "select * from HOO"
+# Into MOO
+- db: *MARIA_DB
+  name: "Maria 6"
+  sql: "INSERT INTO MOO(moo, ts)values(?, ?)"
+  debug: true # Log the data
+# Insert second batch of test data to HOO
+- db: *HSQL_DB
+  name: "HSql 7"
+  sql: "INSERT INTO HOO(hoo, ts)values
+    ('m0',           timestamp'2018-02-01 20:53:00'),
+    ('m3',           timestamp'2018-02-05 20:53:40'),
+    ('m4',           timestamp'2018-02-06 20:53:50'),
+    ('m5',           timestamp'2018-02-07 20:53:55')"
+- db: *MARIA_DB
+  name: "Maria 8"
+  hasResult: true
+  sql: "select max(ts) from MOO"
+# Load new data from HOO
+- db: *HSQL_DB
+  name: "HSql 9"
+  hasResult: true
+  sql: "select hoo, ts from HOO where ts > ?"
+# Into MOO but with "LOAD DATA LOCAL IN FILE" syntax
+- !!com.tm.etl.dbcopy.components.MySqlInFileStep
+  stream: !!com.tm.etl.dbcopy.components.ResultSetInputStream
+    debug: true
+    columnSeparator: X
+  db: *MARIA_DB
+  name: "Maria 10"
+  sql: "LOAD DATA LOCAL INFILE 'dummy'
+          INTO TABLE MOO
+        	    CHARACTER SET latin1
+        	    FIELDS TERMINATED BY 'X'
+        	    ESCAPED BY '!'
+        	    /* OPTIONALLY ENCLOSED BY '&quot;' */
+        	    LINES TERMINATED BY '\n'
+        	    IGNORE 0 LINES
+        	    (moo, ts)"
+  debug: true
+- db: *MARIA_DB
+  name: "Maria 11"
+  hasResult: true
+  sql: "select * from MOO"
+- db: *HSQL_DB
+  name: "HSql 12"
+  sql: "INSERT INTO HOO(hoo, ts)values(?, ?)"
+  debug: true
+- db: *MARIA_DB
+  name: "Maria 13"
+  sql: "select case when count(1) = 6 then 1 else 1/0 end tst from MOO"
+  debug: true
+- db: *HSQL_DB
+  name: "HSql 14"
+  hasResult: true
+  sql: "select * from HOO"
+  dump: true
+- db: *HSQL_DB
+  name: "HSql 14"
+  hasResult: true
+  sql: "select count(1) HOO_COUNT from HOO"
+  debug: true
+  toContext: true
+- db: *HSQL_DB
+  name: "HSql 14"
+  hasResult: true
+  sql: "select case when ${HOO_COUNT} = 13 then 1 else 0 end HOO_OK from (VALUES(0))"
+  debug: true
+  toContext: true
+- db: *HSQL_DB
+  name: "HSql 14"
+  hasResult: true
+  sql: "select 1/${HOO_OK} from (VALUES(0))"
+  dump: true
