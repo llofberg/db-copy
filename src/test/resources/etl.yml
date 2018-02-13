@@ -24,6 +24,8 @@ steps:
 - db: *MARIA_DB
   name: "Maria 1"
   sql: "SELECT '${dbCopyJar}', '${SECRET}'"
+  dump: true
+  hasResult: true
 # Create test tables
 - db: *HSQL_DB
   name: "HSql 2"

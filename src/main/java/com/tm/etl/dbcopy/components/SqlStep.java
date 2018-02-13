@@ -80,11 +80,13 @@ public class SqlStep {
       dump(resultSet);
       resultSet.close();
       resultSet = null;
+      hasResult = false;
     }
     if (toContext && resultSet != null) {
       toContext(resultSet);
       resultSet.close();
       resultSet = null;
+      hasResult = false;
     }
   }
 
