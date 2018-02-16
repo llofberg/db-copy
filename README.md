@@ -9,11 +9,11 @@ A simple ETL tool to copy data between JDBC databases.
                 Configuration file name.
               -p, --properties
                 Properties file name.
-              -h, --help, --usage
-                Usage.
               -e, --withEnvironment
                 Use environment variables as substites.
                 Default: false
+              -h, --help, --usage
+                Usage.
 
 Configuration is a YAML file with optional template placeholders that are substituted
 from the property file and optionally from environment variables.
@@ -32,7 +32,9 @@ First list,```dbs``` lists databases data is copied from and to.
             pass: ${HSQL_PASSWORD}
             driver: "org.hsqldb.jdbc.JDBCDriver"
             url: "jdbc:hsqldb:mem:testw"
-            path: ./drivers/hsqldb-2.3.1.jar
+            jars:
+              - "jar:https://repo1.maven.org/maven2/org/hsqldb/hsqldb/2.3.1/hsqldb-2.3.1.jar!/"
+            autoCommit: false
 
           - &MARIA_DB
             name: "MariaDB4j"
@@ -41,14 +43,15 @@ First list,```dbs``` lists databases data is copied from and to.
             url: "jdbc:mysql://localhost:${PORT}/test"
 
 
-| Parameter | Description                               | Example                     |
-|-----------|-------------------------------------------|-----------------------------|
-| name      | Descriptive name                          | Development HSql            |
-| user      | Database user name                        | super_user                  |
-| pass      | Database password                         | super_secret or ${PASSWORD} |
-| driver    | Database JDBC driver class name           | org.hsqldb.jdbc.JDBCDriver  |
-| url       | Database JDCB URL                         | jdbc:hsqldb:mem:test        |
-| path      | Path to the database JDBC driver jar file | ./drivers/hsqldb-2.3.1.jar  |
+| Parameter  | Default | Description                               | Example                              |
+|------------|---------|-------------------------------------------|--------------------------------------|
+| name       |         | Descriptive name                          | Development HSql                     |
+| user       |         | Database user name                        | super_user                           |
+| pass       |         | Database password                         | super_secret or ${PASSWORD}          |
+| driver     |         | Database JDBC driver class name           | org.hsqldb.jdbc.JDBCDriver           |
+| url        |         | Database JDCB URL                         | jdbc:hsqldb:mem:test                 |
+| jars       |         | List of URL's to JDBC driver jar files    | - "jar:./drivers/hsqldb-2.3.1.jar!/" |
+| autocommit |  true   | Automatically commit after each statement | true                                 |
 
 Second list, ```steps``` lists the operations to be executed.
 
@@ -63,18 +66,18 @@ Second list, ```steps``` lists the operations to be executed.
             sql: "CREATE TABLE HOO(hoo VARCHAR(256), ts TIMESTAMP(0))"
 	etc.
 
-| Parameter     | Default | Description                                                                    |             Example |
-|---------------|---------|--------------------------------------------------------------------------------|--------------------:|
-| name          |         | Descriptive name.                                                              |          Sales pull |
-| sql           |         | SQL statement.                                                                 | select a,b,c from d |
-| db            |         | Database "YAML" reference.                                                     |           *MARIA_DB |
-| batchSize     | 1000    | The size of a batch sent to the database when inserting data.                  |               10000 |
-| hasResult     | false   | Indicates that the statement will return a result.                             |                true |
-| doCommit      | true    | Should commit be called after running the statement.                           |                true |
-| batchLogCount | 1000000 | How often to log progress of processing the data.                              |               10000 |
-| toContext     | false   | Place results of the statemnt to the context so they can be used as variables. |                true |
-| debug         | false   | Print the data s it is being processed.                                        |                true |
-| dump          | false   | Dump all data the statement returns. Used for debugging.                       |                true |
+| Parameter     | Default | Description                                                   |             Example |
+|---------------|---------|---------------------------------------------------------------|--------------------:|
+| name          |         | Descriptive name.                                             |          Sales pull |
+| sql           |         | SQL statement.                                                | select a,b,c from d |
+| db            |         | Database "YAML" reference.                                    |           *MARIA_DB |
+| batchSize     | 1000    | The size of a batch sent to the database when inserting data. |               10000 |
+| hasResult     | false   | Indicates that the statement will return a result.            |                true |
+| doCommit      | true    | Should commit be called after running the statement.          |                true |
+| batchLogCount | 1000000 | How often to log progress of processing the data.             |               10000 |
+| toContext     | false   | Place results of the statement to the context as variables.   |                true |
+| debug         | false   | Print the data s it is being processed.                       |                true |
+| dump          | false   | Dump all data the statement returns. Used for debugging.      |                true |
 
 See [test scripts](src/test/resources/) for more examples.
 
