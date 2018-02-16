@@ -11,6 +11,14 @@ dbs:
     - "jar:https://repo1.maven.org/maven2/org/hsqldb/hsqldb/2.3.1/hsqldb-2.3.1.jar!/"
   autoCommit: false
 
+- &H2_DB
+  name: "H2"
+  user: "sa"
+  pass: ""
+  driver: "org.h2.Driver"
+  url: "jdbc:h2:mem:test"
+  autoCommit: false
+
 - &MARIA_DB
   name: "MariaDB4j"
   user: "root"
@@ -22,6 +30,16 @@ steps:
 # Log version and environment variable (be careful!)
 - db: *MARIA_DB
   name: "Maria 1"
+  sql: "SELECT '${dbCopyJar}', '${SECRET}'"
+  dump: true
+  hasResult: true
+- db: *HSQL_DB
+  name: "HSql 1"
+  sql: "SELECT '${dbCopyJar}', '${SECRET}' from (VALUES(0))"
+  dump: true
+  hasResult: true
+- db: *H2_DB
+  name: "H2 1"
   sql: "SELECT '${dbCopyJar}', '${SECRET}'"
   dump: true
   hasResult: true

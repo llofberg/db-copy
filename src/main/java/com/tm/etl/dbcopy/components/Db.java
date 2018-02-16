@@ -36,15 +36,22 @@ public class Db {
 
     if ((jars != null) && (jars.length > 0)) {
       try {
+        log.debug("Loading {}", Arrays.toString(jars));
         URLClassLoader ucl = new URLClassLoader(jars);
-        Driver d = (Driver) Class.forName(driver, true, ucl).newInstance();
-        DriverManager.registerDriver(new DriverShim(d));
+        if ((driver != null) && !"".equals(driver)) {
+          log.debug("Loading {}", driver);
+          Driver d = (Driver) Class.forName(driver, true, ucl).newInstance();
+          DriverManager.registerDriver(new DriverShim(d));
+        }
+        jars = null;
       } catch (Exception e) {
         throw new RuntimeException("Failed to load driver: " + Arrays.toString(jars), e);
       }
     } else if ((driver != null) && !"".equals(driver)) {
+      log.debug("Loading {}", driver);
       Class.forName(driver);
     }
+    log.debug("Connecting to {}", url);
     connection = DriverManager.getConnection(url, System.getenv(user), System.getenv(pass));
     connection.setAutoCommit(false);
 

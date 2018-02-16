@@ -21,12 +21,13 @@ public class DbCopy {
   private ArrayList<SqlStep> steps;
 
   public static void main(String[] args) throws IOException {
+    log.info("{}: Start", dbCopyJar);
     log.debug("dbCopyJar : {}", dbCopyJar);
     new VelocityLoader<>(DbCopy.class).getLoader(args).ifPresent(DbCopy::run);
+    log.debug("{}: Done", dbCopyJar);
   }
 
   private void run() {
-    log.debug("{}: Start", dbCopyJar);
     SqlStep.context.put("dbCopyJar", dbCopyJar);
     validate(steps);
     SqlStep previousStep = null;
@@ -36,7 +37,7 @@ public class DbCopy {
       } catch (Exception e) {
         if (step.okToFail) {
           log.info("Step '{}' failed, but it's ok. Cause: '{}'", step.getName(), e.getMessage());
-          if(step.isStopWhenNoInput()){
+          if (step.isStopWhenNoInput()) {
             break;
           }
         } else {
@@ -46,7 +47,6 @@ public class DbCopy {
       }
       previousStep = step;
     }
-    log.debug("{}: Done", dbCopyJar);
   }
 
   private void validate(ArrayList<SqlStep> steps) {

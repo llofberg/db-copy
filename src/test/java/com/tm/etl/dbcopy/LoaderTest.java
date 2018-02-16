@@ -16,7 +16,7 @@ public class LoaderTest {
 
   @Test
   public void test() throws Exception {
-    log.info("Setting up databases");
+    log.info("Setting up test databases");
     int port = getPort();
 
     DB database = DB.newEmbeddedDB(port);
@@ -26,7 +26,7 @@ public class LoaderTest {
     env.put("SECRET", "P$SS");
     env.put("PORT", "" + port);
     set(env);
-    log.info("Setting up databases done");
+    log.info("Setting up test databases done");
 
     DbCopy.main(new String[]{"-c", "src/test/resources/etl.yml", "-e"});
   }
